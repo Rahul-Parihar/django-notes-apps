@@ -1,11 +1,8 @@
-@Library("shared") _
-pipeline{
-    
-    agent { label "Server1" }
+@Library("Shared") _
+pipeline {
+    agent { label "Vinod" }
 
-    
-    stages{
-        
+    stages {
         stage("Hello"){
             steps{
                 script{
@@ -13,31 +10,35 @@ pipeline{
                 }
             }
         }
-        
-        stage("Code"){
-            steps{
-               script{
-                clone("https://github.com/Rahul-Parihar/django-notes-apps.git", "main")
-               }
-            }
-        }
-        stage("Build"){
-            steps{
+        stage("Code") {
+            steps {
                 script{
-                docker_build("notes-app","latest","rahulsinghparihar")
+                git branch: 'main', url: 'https://github.com/Rahul-Parihar/django-notes-apps.git'
                 }
             }
         }
-        stage("Push to Dockerhub"){
-            steps{
-               script{
-                   docker_push("notes-app","latest","rahulsinghparihar")
-               }
+
+        stage("Build") {
+            steps {
+                script{
+                docker_build("notes-app","latest", "rahulsinghparihar")
+                }
             }
         }
-        stage("Deploy"){
-            steps{
-                echo "This is deploying the code"
+
+        stage("Push to DockerHub") {
+            steps {
+                script{
+                    docker_push("notes-app","latest","rahulsinghparihar")
+                
+                }
+            }
+        }
+
+        stage("Deploy") {
+            steps {
+                echo "Deploying the Docker container..."
+                sh "docker compose down || true"
                 sh "docker compose up -d"
             }
         }
